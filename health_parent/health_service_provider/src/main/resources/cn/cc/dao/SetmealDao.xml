@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cc.dao.SetmealDao">
+
+    <resultMap id="baseResultMap" type="cn.cc.pojo.Setmeal">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <result column="helpCode" property="helpCode"/>
+        <result column="sex" property="sex"/>
+        <result column="age" property="age"/>
+        <result column="price" property="price"/>
+        <result column="remark" property="remark"/>
+        <result column="attention" property="attention"/>
+        <result column="img" property="img"/>
+    </resultMap>
+    <resultMap id="findByIdResultMap" type="cn.cc.pojo.Setmeal">
+        <!--多对多映射-->
+        <collection property="checkGroups"
+                    javaType="ArrayList"
+                    ofType="cn.cc.pojo.CheckGroup"
+                    column="id"
+                    select="cn.cc.dao.CheckGroupDao.findCheckGroupById">
+        </collection>
+    </resultMap>
+
+    <!--新增套餐-->
+    <!--增加套餐-->
+    <insert id="add" parameterType="cn.cc.pojo.Setmeal">
+        <!--通过mybatis框架提供的selectKey获得自增id-->
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+             select LAST_INSERT_ID()
+        </selectKey>
+        insert into t_setmeal
+        (code,name,sex,age,helpCode,price,remark,attention,img)
+        values
+        (#{code},#{name},#{sex},#{age},#{helpCode},#{price},#{remark},#{attention},#{img})
+    </insert>
+    <!--设置套餐和检查组的多对多关系-->
+    <insert id="setSetmealAndCheckgroup" parameterType="map">
+        insert into t_setmeal_checkgroup
+            (setmeal_id,checkgroup_id)
+        values
+            (#{setmealId},#{checkGroupId})
+    </insert>
+
+    <!--分页查询-->
+    <select id="findByCondition" parameterType="string" resultType="cn.cc.pojo.Setmeal">
+        select * from t_setmeal
+        <if test="value != null and value != '' and value.length > 0">
+            where code = #{value} or name = #{value} or helpCode = #{value}
+        </if>
+    </select>
+
+    <!--用户端查询所有套餐-->
+    <select id="findAll" resultType="cn.cc.pojo.Setmeal">
+        select * from t_setmeal
+    </select>
+
+    <!--根据套餐id查询套餐详细信息-->
+    <select id="findById" resultMap="findByIdResultMap">
+        select * from t_setmeal where id = #{id}
+    </select>
+
+    <!--查询套餐名称分组查询预约情况-->
+    <select id="findSetmeal" resultType="map">
+        select s.name,count(o.id) as value from t_setmeal s,t_order o where o.setmeal_id = s.id group by s.name
+    </select>
+</mapper>
