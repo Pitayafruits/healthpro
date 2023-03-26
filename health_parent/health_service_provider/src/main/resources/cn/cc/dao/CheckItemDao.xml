@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cc.dao.CheckItemDao">
+    <!--新增检查项-->
+    <insert id="add" parameterType="cn.cc.pojo.CheckItem">
+        insert into t_checkitem(code,name,sex,age,price,type,remark,attention)
+                      values
+        (#{code},#{name},#{sex},#{age},#{price},#{type},#{remark},#{attention})
+    </insert>
+
+    <!--检查项分页查询-->
+    <select id="selectByCondition" parameterType="String" resultType="cn.cc.pojo.CheckItem">
+        select * from t_checkitem
+        <if test="value != null and value.length > 0">
+            where code = #{value} or name = #{value}
+        </if>
+    </select>
+
+    <!--检查项删除-->
+    <!--根据检查项id统计数量-->
+    <select id="findCountByCheckItemId" parameterType="int" resultType="long">
+        select count(*) from t_checkgroup_checkitem where checkitem_id = #{checkitem_id}
+    </select>
+    <!--执行删除-->
+    <delete id="deleteById" parameterType="int">
+        delete from t_checkitem where id = #{id}
+    </delete>
+
+    <!--检查项编辑-->
+    <update id="edit" parameterType="cn.cc.pojo.CheckItem">
+        update t_checkitem
+    <set>
+        <if test="name != null">
+            name = #{name},
+        </if>
+        <if test="sex != null">
+            sex = #{sex},
+        </if>
+        <if test="code != null">
+            code = #{code},
+        </if>
+        <if test="age != null">
+            age = #{age},
+        </if>
+        <if test="price != null">
+            price = #{price},
+        </if>
+        <if test="type != null">
+            type = #{type},
+        </if>
+        <if test="attention != null">
+            attention = #{attention},
+        </if>
+        <if test="remark != null">
+            remark = #{remark},
+        </if>
+    </set>
+    where id = #{id}
+    </update>
+    <!--编辑检查项前的数据回显-->
+    <select id="findById" parameterType="int" resultType="cn.cc.pojo.CheckItem">
+        select * from t_checkitem where id = #{id}
+    </select>
+
+    <!--新建检查组时的展示所有检查项-->
+    <select id="findAll" resultType="cn.cc.pojo.CheckItem">
+        select * from t_checkitem
+    </select>
+
+    <!--根据检查组id查询检查项信息-->
+    <select id="findCheckItemById" resultType="cn.cc.pojo.CheckItem">
+        select * from t_checkitem
+        where id
+        in (select checkitem_id from t_checkgroup_checkitem where checkgroup_id=#{id})
+    </select>
+</mapper>
